@@ -31,40 +31,46 @@ def generate_spectrogram(wav_path, save_path):
 #Generate spectrograms for all audio files
 audio_files = glob.glob(os.path.join(data_dir, '*.wav'))
 
-# for audio_file in audio_files:
-#     filename = os.path.basename(audio_file).replace('.wav', '.png')
-#     save_path = os.path.join(spectrogram_dir, filename)
-#     generate_spectrogram(audio_file, save_path)
+for audio_file in audio_files:
+    filename = os.path.basename(audio_file).replace('.wav', '.png')
+    save_path = os.path.join(spectrogram_dir, filename)
+    generate_spectrogram(audio_file, save_path)
     
+def load_and_process_data():
+    # Load merged dataframe
+    merged_df = pd.read_csv('/Users/omama/Documents/Portfolio/respiratory_classification/data/processed_respiratory_data.csv')
 
-# Load merged dataframe
-merged_df = pd.read_csv('/Users/omama/Documents/Portfolio/respiratory_classification/data/processed_respiratory_data.csv')
+    # Create a dictionary mapping filenames to diagnosis labels
+    label_dict = dict(zip(merged_df['filename'].str.replace('.wav', '.png'), merged_df['Diagnosis']))
 
-# Create a dictionary mapping filenames to diagnosis labels
-label_dict = dict(zip(merged_df['filename'].str.replace('.wav', '.png'), merged_df['Diagnosis']))
+    # Sort the unique labels and map them to numerical values for consistency
+    sorted_labels = sorted(set(label_dict.values()))
+    label_mapping = {label: idx + 1 for idx, label in enumerate(sorted_labels)}
 
-# Sort the unique labels and map them to numerical values for consistency
-sorted_labels = sorted(set(label_dict.values()))
-label_mapping = {label: idx + 1 for idx, label in enumerate(sorted_labels)}
+    # Print the label mapping
+    print("Label Mapping:")
+    for label, num in label_mapping.items():
+        print(f"{label} -> {num}")
+        
+    # Convert each label in label_dict to its numerical value
+    numerical_labels = {k: label_mapping[v] for k, v in label_dict.items()}
 
-# Print the label mapping
-print("Label Mapping:")
-for label, num in label_mapping.items():
-    print(f"{label} -> {num}")
+    # Split the data into filenames and corresponding numerical labels
+    filenames = list(numerical_labels.keys())
+    labels = list(numerical_labels.values())
     
-# Convert each label in label_dict to its numerical value
-numerical_labels = {k: label_mapping[v] for k, v in label_dict.items()}
+    return filenames, labels
 
-# Split the data into filenames and corresponding numerical labels
-filenames = list(numerical_labels.keys())
-labels = list(numerical_labels.values())
+# if __name__ == "__main__":
+#     filenames, labels = load_and_process_data()
+#     print(filenames[:30], labels[:30])
 
-
+# DEBUGGING
 # Print the unique mappings
-print("\nUnique Mappings:")
-unique_mappings = {label_mapping[v]: v for v in set(label_dict.values())}
-for num, label in unique_mappings.items():
-    print(f"{num} -> {label}")
+# print("\nUnique Mappings:")
+# unique_mappings = {label_mapping[v]: v for v in set(label_dict.values())}
+# for num, label in unique_mappings.items():
+#     print(f"{num} -> {label}")
 
 # file_path = '/Users/omama/Documents/Portfolio/respiratory_classification/data/processed_respiratory_data.csv'
 
